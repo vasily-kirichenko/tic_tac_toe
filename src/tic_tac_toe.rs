@@ -70,13 +70,6 @@ struct Board {
 }
 
 impl Board {
-    const POSITIONS: [Pos; 9] =
-        [
-            Pos(0, 0), Pos(0, 1), Pos(0, 2),
-            Pos(1, 0), Pos(1, 1), Pos(1, 2),
-            Pos(2, 0), Pos(2, 1), Pos(2, 2)
-        ];
-
     fn new() -> Self {
         Board { cells: HashMap::new() }
     }
@@ -88,7 +81,7 @@ impl Board {
     }
 
     fn any_more_moves(&self) -> bool {
-        self.cells.iter().count() < Self::POSITIONS.len()
+        self.cells.iter().count() < 9
     }
 
     fn set(&mut self, pos: Pos, player: Player) -> () {
@@ -113,7 +106,6 @@ impl Model {
             board: Board::new(),
         }
     }
-
 
     pub fn get_game_result(&self) -> GameResult {
         let lines = [
@@ -188,7 +180,9 @@ mod binding {
 }
 
 pub fn view() -> Vec<ViewBinding> {
-    Board::POSITIONS
+    let positions = c![Pos(x, y), for x in 0..2, for y in 0..2];
+
+    positions
         .iter()
         .flat_map(|&p| {
             vec![
@@ -206,20 +200,4 @@ pub fn view() -> Vec<ViewBinding> {
             ]
         )
         .collect()
-}
-
-struct Foo;
-
-impl Foo {
-    fn foo(x: i32) -> i32 { x }
-    fn method(&self, x: i32) -> i32 { x }
-}
-
-fn test() {
-    let mut xs: Vec<i32> = (1..5).map(|x| Foo::foo(x)).collect();
-    xs = (1..5).map(Foo::foo).collect();
-
-    let foo = Foo;
-    xs = (1..5).map(|x| foo.method(x)).collect();
-    xs = (1..5).map(foo.method).collect();
 }

@@ -1,3 +1,6 @@
+#[macro_use(c)]
+extern crate cute;
+
 mod tic_tac_toe;
 
 use tic_tac_toe::*;
