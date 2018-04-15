@@ -32,7 +32,7 @@ pub enum GameResult {
 
 use self::GameResult::*;
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 pub struct Pos(i32, i32);
 
 impl Pos {
@@ -65,7 +65,9 @@ impl Line {
 }
 
 #[derive(Debug)]
-struct Board(HashMap<Pos, Player>);
+struct Board {
+    cells: HashMap<Pos, Player>
+}
 
 impl Board {
     const POSITIONS: [Pos; 9] =
@@ -76,25 +78,25 @@ impl Board {
         ];
 
     fn new() -> Self {
-        Board(HashMap::new())
+        Board { cells: HashMap::new() }
     }
 
     fn get_line(&self, line: &[Pos; 3]) -> Line {
         Line(line.iter()
-            .map(|x| self.0.get(x).map(|&x| x))
+            .map(|x| self.cells.get(x).map(|&x| x))
             .collect())
     }
 
     fn any_more_moves(&self) -> bool {
-        self.0.iter().count() < Self::POSITIONS.len()
+        self.cells.iter().count() < Self::POSITIONS.len()
     }
 
     fn set(&mut self, pos: Pos, player: Player) -> () {
-        (self.0).insert(pos, player);
+        self.cells.insert(pos, player);
     }
 
     fn get(&self, pos: &Pos) -> Option<&Player> {
-        self.0.get(pos)
+        self.cells.get(pos)
     }
 }
 
@@ -112,6 +114,7 @@ impl Model {
         }
     }
 
+
     pub fn get_game_result(&self) -> GameResult {
         let lines = [
             [Pos(0, 0), Pos(0, 1), Pos(0, 2)],
@@ -126,9 +129,8 @@ impl Model {
 
         let line =
             lines.iter()
-                .filter_map(|line|
-                    self.board.get_line(line).get_winner()
-                )
+                .map(|line| self.board.get_line(line))
+                .filter_map(|line| line.get_winner())
                 .collect::<Vec<Player>>();
 
         let line_winner = line.first();
@@ -188,12 +190,12 @@ mod binding {
 pub fn view() -> Vec<ViewBinding> {
     Board::POSITIONS
         .iter()
-        .flat_map(|p| {
+        .flat_map(|&p| {
             vec![
-                binding::msg("Play", Play(Pos(p.0, p.1))),
-                binding::one_way("CanPlay", |m| m.can_play(m.board.get(p))),
+                binding::msg("Play", Play(p)),
+                binding::one_way("CanPlay", |m| m.can_play(m.board.get(&p))),
                 binding::one_way("Image", |m|
-                    m.board.get(p).map(|x| x.image()).unwrap_or("".to_string()),
+                    m.board.get(&p).map(|x| x.image()).unwrap_or("".to_string()),
                 )
             ]
         })
@@ -204,4 +206,20 @@ pub fn view() -> Vec<ViewBinding> {
             ]
         )
         .collect()
+}
+
+struct Foo;
+
+impl Foo {
+    fn foo(x: i32) -> i32 { x }
+    fn method(&self, x: i32) -> i32 { x }
+}
+
+fn test() {
+    let mut xs: Vec<i32> = (1..5).map(|x| Foo::foo(x)).collect();
+    xs = (1..5).map(Foo::foo).collect();
+
+    let foo = Foo;
+    xs = (1..5).map(|x| foo.method(x)).collect();
+    xs = (1..5).map(foo.method).collect();
 }
