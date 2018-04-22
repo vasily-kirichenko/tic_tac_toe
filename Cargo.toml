@@ -5,3 +5,4 @@ authors = ["vaskir"]
 
 [dependencies]
 cute = "*"
+clippy = { version = "*", optional = true }

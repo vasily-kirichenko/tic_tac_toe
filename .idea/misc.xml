@@ -9,5 +9,6 @@
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
     <option name="useCargoCheckAnnotator" value="true" />
+    <option name="useOfflineForCargoCheck" value="true" />
   </component>
 </project>

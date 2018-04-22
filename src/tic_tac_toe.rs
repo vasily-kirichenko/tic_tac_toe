@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug)]
-enum Player {
+pub enum Player {
     X,
     O,
 }
@@ -40,11 +40,12 @@ impl Pos {
         Pos(x, y)
     }
 
-    fn ui_text(&self) -> String {
-        format!("{}{}", self.0, self.1)
-    }
+//    fn ui_text(&self) -> String {
+//        format!("{}{}", self.0, self.1)
+//    }
 }
 
+#[derive(Copy, Clone)]
 pub enum Msg {
     Play(Pos),
     Restart,
@@ -74,9 +75,9 @@ impl Board {
         Board { cells: HashMap::new() }
     }
 
-    fn get_line(&self, line: &[Pos; 3]) -> Line {
+    fn get_line(&self, line: &[Pos]) -> Line {
         Line(line.iter()
-            .map(|x| self.cells.get(x).map(|&x| x))
+            .map(|x| self.cells.get(x).cloned())
             .collect())
     }
 
@@ -99,6 +100,12 @@ pub struct Model {
     board: Board,
 }
 
+macro_rules! line {
+    ($(($x: expr, $y: expr)),*) => {
+        &[$(Pos($x, $y)),*]
+    }
+}
+
 impl Model {
     pub fn new() -> Self {
         Model {
@@ -109,19 +116,19 @@ impl Model {
 
     pub fn get_game_result(&self) -> GameResult {
         let lines = [
-            [Pos(0, 0), Pos(0, 1), Pos(0, 2)],
-            [Pos(1, 0), Pos(1, 1), Pos(1, 2)],
-            [Pos(2, 0), Pos(2, 1), Pos(2, 2)],
-            [Pos(0, 0), Pos(1, 0), Pos(2, 0)],
-            [Pos(0, 1), Pos(1, 1), Pos(2, 1)],
-            [Pos(0, 2), Pos(1, 2), Pos(2, 2)],
-            [Pos(0, 0), Pos(1, 1), Pos(2, 2)],
-            [Pos(0, 2), Pos(1, 1), Pos(2, 0)]
+            line![(0, 0), (0, 1), (0, 2)],
+            line![(1, 0), (1, 1), (1, 2)],
+            line![(2, 0), (2, 1), (2, 2)],
+            line![(0, 0), (1, 0), (2, 0)],
+            line![(0, 1), (1, 1), (2, 1)],
+            line![(0, 2), (1, 2), (2, 2)],
+            line![(0, 0), (1, 1), (2, 2)],
+            line![(0, 2), (1, 1), (2, 0)]
         ];
 
         let line =
             lines.iter()
-                .map(|line| self.board.get_line(line))
+                .map(|&line| self.board.get_line(line))
                 .filter_map(|line| line.get_winner())
                 .collect::<Vec<Player>>();
 
@@ -170,11 +177,11 @@ pub struct ViewBinding;
 mod binding {
     use tic_tac_toe::*;
 
-    pub fn one_way<T>(name: &'static str, getter: impl FnOnce(Model) -> T) -> ViewBinding {
+    pub fn one_way<T>(_name: &'static str, _getter: impl FnOnce(Model) -> T) -> ViewBinding {
         ViewBinding
     }
 
-    pub fn msg(name: &'static str, msg: Msg) -> ViewBinding {
+    pub fn msg(_name: &'static str, _msg: Msg) -> ViewBinding {
         ViewBinding
     }
 }
@@ -189,7 +196,7 @@ pub fn view() -> Vec<ViewBinding> {
                 binding::msg("Play", Play(p)),
                 binding::one_way("CanPlay", |m| m.can_play(m.board.get(&p))),
                 binding::one_way("Image", |m|
-                    m.board.get(&p).map(|x| x.image()).unwrap_or("".to_string()),
+                    m.board.get(&p).map(|x| x.image()).unwrap_or_else(|| "".to_string()),
                 )
             ]
         })
