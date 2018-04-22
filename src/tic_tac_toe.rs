@@ -115,6 +115,7 @@ impl Model {
     }
 
     pub fn get_game_result(&self) -> GameResult {
+        trace_macros!(true);
         let lines = [
             line![(0, 0), (0, 1), (0, 2)],
             line![(1, 0), (1, 1), (1, 2)],
@@ -125,6 +126,7 @@ impl Model {
             line![(0, 0), (1, 1), (2, 2)],
             line![(0, 2), (1, 1), (2, 0)]
         ];
+        trace_macros!(false);
 
         let line =
             lines.iter()

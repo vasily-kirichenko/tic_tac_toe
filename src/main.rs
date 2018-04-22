@@ -6,8 +6,6 @@
 #[macro_use(c)]
 extern crate cute;
 
-trace_macros!(true);
-
 mod tic_tac_toe;
 
 use tic_tac_toe::*;
