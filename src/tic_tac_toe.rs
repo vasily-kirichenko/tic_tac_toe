@@ -77,8 +77,8 @@ impl Board {
 
     fn get_line(&self, line: &[Pos]) -> Line {
         Line(line.iter()
-            .map(|x| self.cells.get(x).cloned())
-            .collect())
+                 .map(|x| self.cells.get(x).cloned())
+                 .collect())
     }
 
     fn any_more_moves(&self) -> bool {
@@ -115,7 +115,7 @@ impl Model {
     }
 
     pub fn get_game_result(&self) -> GameResult {
-        trace_macros!(true);
+//        trace_macros!(true);
         let lines = [
             line![(0, 0), (0, 1), (0, 2)],
             line![(1, 0), (1, 1), (1, 2)],
@@ -126,13 +126,13 @@ impl Model {
             line![(0, 0), (1, 1), (2, 2)],
             line![(0, 2), (1, 1), (2, 0)]
         ];
-        trace_macros!(false);
+//        trace_macros!(false);
 
         let line =
             lines.iter()
-                .map(|&line| self.board.get_line(line))
-                .filter_map(|line| line.get_winner())
-                .collect::<Vec<Player>>();
+                 .map(|&line| self.board.get_line(line))
+                 .filter_map(|line| line.get_winner())
+                 .collect::<Vec<Player>>();
 
         let line_winner = line.first();
 
@@ -210,3 +210,4 @@ pub fn view() -> Vec<ViewBinding> {
         )
         .collect()
 }
+

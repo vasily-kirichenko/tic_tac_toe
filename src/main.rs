@@ -15,17 +15,17 @@ fn render(model: &Model, i: &mut i32) -> () {
     println!("[{}] {:?}", i, model)
 }
 
-fn main() {
-    let mut model = Model::new();
-    let _view = view();
-    let mut i = 0;
-
-    model.update(Msg::Play(Pos::new(0, 0)), |msg| println!("{}", msg));
-    render(&model, &mut i);
-
-    model.update(Msg::Play(Pos::new(2, 2)), |msg| println!("{}", msg));
-    render(&model, &mut i);
-}
+//fn main() {
+//    let mut model = Model::new();
+//    let _view = view();
+//    let mut i = 0;
+//
+//    model.update(Msg::Play(Pos::new(0, 0)), |msg| println!("{}", msg));
+//    render(&model, &mut i);
+//
+//    model.update(Msg::Play(Pos::new(2, 2)), |msg| println!("{}", msg));
+//    render(&model, &mut i);
+//}
 
 enum Planet {
     Mercury,
@@ -39,6 +39,9 @@ enum Planet {
 }
 
 use Planet::*;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::hash::Hash;
 
 impl Planet {
     fn mass(&self) -> f64 {
@@ -80,3 +83,37 @@ fn test() {
     };
 }
 
+#[derive(Debug)]
+struct Table<K: Hash + Eq, V: Hash + Eq> {
+    table: HashMap<K, HashSet<V>>
+}
+
+impl<K: Hash + Eq, V: Hash + Eq> Table<K, V> {
+    pub fn add(&mut self, k: K, v: V) {
+        self.table
+            .entry(k)
+            .or_insert_with(|| HashSet::new())
+            .insert(v);
+    }
+
+    pub fn count(&self) -> usize {
+        self.table.values().map(|set| set.len()).sum()
+    }
+
+    pub fn contains(&self, k: &K, v: &V) -> bool {
+        match self.table.get(k) {
+            Some(set) => set.contains(v),
+            None => false
+        }
+    }
+}
+
+fn main() {
+    let mut t: Table<i32, i32> = Table { table: HashMap::new() };
+    t.add(1, 2);
+    t.add(1, 3);
+    t.add(10, 20);
+    println!("{:?}", t);
+    println!("contains 3? = {}", t.contains(&1, &3));
+    println!("count = {}", t.count())
+}
